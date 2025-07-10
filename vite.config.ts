@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: '/Typing-Trainer/',
   root: '.',
-  base: 'https://github.com/GooberHeads6297/Typing-Trainer/', // <-- replace with your actual repo name if different
   build: {
     outDir: 'dist',
     emptyOutDir: true,
