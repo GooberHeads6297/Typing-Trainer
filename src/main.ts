@@ -270,12 +270,18 @@ function resetTest(): void {
   streakDisplay.textContent = `Streak: ${streakCounter}`;
 }
 
-function getTrimmedAverageWPM(samples: number[]): number {
-  if (samples.length < 5) return Math.round(samples.reduce((a, b) => a + b, 0) / (samples.length || 1));
-  const sorted = samples.slice().sort((a, b) => a - b);
-  const trimCount = Math.floor(samples.length * 0.1);
-  const trimmed = sorted.slice(trimCount, samples.length - trimCount);
+function getTrimmedAverageWPM(samples: { time: number; wpm: number }[]): number {
+  const filtered = samples
+    .filter(s => s.time >= 2000 && s.wpm >= 10 && s.wpm <= 200)
+    .map(s => s.wpm);
+
+  if (filtered.length === 0) return 0;
+
+  const sorted = filtered.sort((a, b) => a - b);
+  const trimCount = Math.floor(sorted.length * 0.1);
+  const trimmed = sorted.slice(trimCount, sorted.length - trimCount);
   const average = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
+
   return Math.round(average);
 }
 
