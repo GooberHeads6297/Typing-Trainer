@@ -129,7 +129,7 @@ function updateStats(): void {
     wpmSamples.push({ time: elapsed, wpm });
   }
 
-  const averageWPM = getTrimmedAverageWPM(wpmSamples.map(s => s.wpm));
+  const averageWPM = getTrimmedAverageWPM(wpmSamples);
   const stdDev = standardDeviation(wpmSamples.map(s => s.wpm));
   const consistency = Math.max(0, Math.round((1 - stdDev / (averageWPM || 1)) * 100));
   consistencyDisplay.textContent = `Consistency: ${consistency}%`;
@@ -183,7 +183,7 @@ function showPerformance(): void {
   inputField.blur();
   inputField.disabled = true;
 
-  const averageWPM = getTrimmedAverageWPM(wpmSamples.map(s => s.wpm));
+  const averageWPM = getTrimmedAverageWPM(wpmSamples);
   avgWpmDisplay.textContent = `Average WPM: ${averageWPM}`;
 
   const durationSeconds = (wpmSamples[wpmSamples.length - 1].time / 1000).toFixed(3);
