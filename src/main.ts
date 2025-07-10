@@ -125,7 +125,7 @@ function updateStats(): void {
   wpmDisplay.textContent = `WPM: ${wpm}`;
   accuracyDisplay.textContent = `Accuracy: ${accuracy}%`;
 
-  if (!finished) {
+  if (!finished && elapsed > 1000 && wpm > 0 && wpm <= 200) {
     wpmSamples.push({ time: elapsed, wpm });
   }
 
