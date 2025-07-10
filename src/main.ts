@@ -125,13 +125,11 @@ function updateStats(): void {
   wpmDisplay.textContent = `WPM: ${wpm}`;
   accuracyDisplay.textContent = `Accuracy: ${accuracy}%`;
 
-  if (!finished && elapsed > 1000 && wpm > 0 && wpm <= 200) {
+  if (!finished && elapsed > 2000 && wpm > 0 && wpm <= 200) {
     wpmSamples.push({ time: elapsed, wpm });
   }
 
-  const averageWPM = wpmSamples.length
-    ? Math.round(wpmSamples.reduce((a, b) => a + b.wpm, 0) / wpmSamples.length)
-    : 0;
+  const averageWPM = getTrimmedAverageWPM(wpmSamples.map(s => s.wpm));
   const stdDev = standardDeviation(wpmSamples.map(s => s.wpm));
   const consistency = Math.max(0, Math.round((1 - stdDev / (averageWPM || 1)) * 100));
   consistencyDisplay.textContent = `Consistency: ${consistency}%`;
@@ -179,16 +177,13 @@ inputField.addEventListener('keydown', (e) => {
   }
 });
 
-
 function showPerformance(): void {
   app.style.display = 'none';
   performanceContainer.style.display = 'block';
   inputField.blur();
   inputField.disabled = true;
 
-  const averageWPM = wpmSamples.length
-    ? Math.round(wpmSamples.reduce((a, b) => a + b.wpm, 0) / wpmSamples.length)
-    : 0;
+  const averageWPM = getTrimmedAverageWPM(wpmSamples.map(s => s.wpm));
   avgWpmDisplay.textContent = `Average WPM: ${averageWPM}`;
 
   const durationSeconds = (wpmSamples[wpmSamples.length - 1].time / 1000).toFixed(3);
@@ -257,7 +252,6 @@ function showPerformance(): void {
   });
 }
 
-
 function resetTest(): void {
   targetText = getRandomText();
   userInput = '';
@@ -274,6 +268,15 @@ function resetTest(): void {
   accuracyDisplay.textContent = 'Accuracy: 100%';
   consistencyDisplay.textContent = 'Consistency: 100%';
   streakDisplay.textContent = `Streak: ${streakCounter}`;
+}
+
+function getTrimmedAverageWPM(samples: number[]): number {
+  if (samples.length < 5) return Math.round(samples.reduce((a, b) => a + b, 0) / (samples.length || 1));
+  const sorted = samples.slice().sort((a, b) => a - b);
+  const trimCount = Math.floor(samples.length * 0.1);
+  const trimmed = sorted.slice(trimCount, samples.length - trimCount);
+  const average = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
+  return Math.round(average);
 }
 
 function standardDeviation(values: number[]): number {
