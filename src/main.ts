@@ -13,6 +13,7 @@ let targetText = '';
 let userInput = '';
 let startTime = 0;
 let finished = false;
+let typingStarted = false;
 let wpmSamples: { time: number; wpm: number }[] = [];
 
 const performanceContainer = document.createElement('div');
@@ -125,7 +126,7 @@ function updateStats(): void {
   wpmDisplay.textContent = `WPM: ${wpm}`;
   accuracyDisplay.textContent = `Accuracy: ${accuracy}%`;
 
-  if (!finished && elapsed > 2000 && wpm > 0 && wpm <= 200) {
+  if (!finished && typingStarted && elapsed > 2000 && wpm > 0 && wpm <= 200) {
     wpmSamples.push({ time: elapsed, wpm });
   }
 
@@ -137,6 +138,11 @@ function updateStats(): void {
 
 inputField.addEventListener('input', () => {
   if (finished) return;
+
+  if (!typingStarted) {
+    typingStarted = true;
+    startTime = Date.now();
+  }
 
   userInput = inputField.value;
 
@@ -256,8 +262,9 @@ function resetTest(): void {
   targetText = getRandomText();
   userInput = '';
   finished = false;
+  typingStarted = false;
   wpmSamples = [];
-  startTime = Date.now();
+  startTime = 0;
   inputField.value = '';
   inputField.classList.remove('finished');
   inputField.disabled = false;
