@@ -27,6 +27,5 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
+          personal_token: ${{ secrets.GH_DEPLOY_TOKEN }}
           publish_dir: ./dist
-          external_repository: GooberHeads6297/Typing-Trainer
-          deploy_token: ${{ secrets.GH_DEPLOY_TOKEN }}
