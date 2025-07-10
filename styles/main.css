@@ -1,0 +1,258 @@
+/* Streak counter styling */
+.streak-counter {
+  margin: 0.5rem 0 0.2rem 0;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffea00;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  padding: 0.4rem 1.2rem;
+  box-shadow: 0 0 8px #ffea0044, 0 0 2px #000;
+  width: fit-content;
+  letter-spacing: 0.04em;
+  user-select: none;
+  transition: background 0.2s, color 0.2s;
+  align-self: flex-start;
+}
+
+/* Confetti styles */
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 18px;
+  border-radius: 3px;
+  opacity: 0.85;
+  animation: confetti-fall 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  transform: rotateZ(0deg);
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-40px) rotateZ(0deg);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotateZ(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes typingBackground {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(270deg, #121212, #1f1f1f, #121212, #1f1f1f);
+  background-size: 400% 400%;
+  animation: typingBackground 20s linear infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  color: #eee;
+}
+
+.app {
+  text-align: center;
+  background: #222;
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.15),
+              0 0 30px rgba(0, 255, 255, 0.1);
+  width: 90%;
+  max-width: 600px;
+}
+
+#chunkDisplay {
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+  min-height: 2.5rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #0ff;
+  text-shadow: 0 0 5px #0ff, 0 0 10px #0ff8;
+  word-wrap: break-word;
+}
+
+#inputField {
+  font-size: 1.3rem;
+  width: 80%;
+  max-width: 500px;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  background: #111;
+  color: #0ff;
+  box-shadow: inset 0 0 8px #0ff;
+  caret-color: #0ff;
+  transition: box-shadow 0.3s ease, background 0.3s ease;
+  letter-spacing: 0.03em;
+}
+#inputField:focus {
+  box-shadow: 0 0 12px #0ff, inset 0 0 12px #0ff;
+}
+
+#inputField.finished {
+  background: #222;
+  box-shadow: 0 0 20px #00ffcc88;
+}
+
+#stats {
+  margin-top: 2rem;
+  font-size: 1.1rem;
+  color: #aaa;
+  display: flex;
+  justify-content: space-around;
+  user-select: none;
+}
+#stats span {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Ghost/correct/incorrect character styles */
+.ghost {
+  color: #888;
+  opacity: 0.35;
+  text-shadow: none;
+  font-weight: 400;
+}
+
+.correct {
+  color: #00ff99;
+  font-weight: 700;
+  text-shadow: 0 0 4px #00ffcc;
+}
+
+.incorrect {
+  color: #ff3b3b;
+  font-weight: 700;
+  text-shadow: 0 0 4px #ff3b3b44;
+}
+
+#performanceContainer {
+  background: #222;
+  color: #0ff;
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.15),
+              0 0 30px rgba(0, 255, 255, 0.1);
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+}
+
+#performanceContainer button {
+  background: #0ff;
+  border: none;
+  color: #000;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: background 0.3s ease;
+}
+
+#performanceContainer button:hover {
+  background: #00c6cc;
+}
+
+#avgWpmDisplay {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  position: relative;
+  height: 30px;
+  background: #333;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0ff;
+}
+
+#wpmBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #0ff;
+  border-radius: 5px;
+  transition: width 0.5s ease;
+  z-index: 0;
+}
+
+#avgWpmDisplay::before {
+  content: attr(data-label);
+  position: relative;
+  z-index: 1;
+}
+
+/* Duration label */
+#durationDisplay {
+  margin: 0.5rem 0;
+  font-size: 1.2rem;
+  color: #aaa;
+}
+
+/* Histogram container and SVG */
+#chartContainer {
+  width: 100%;
+  height: 200px;
+  background-color: #111;
+  border: 1px solid #0ff;
+  border-radius: 8px;
+  position: relative;
+  overflow: visible; /* changed from hidden to visible */
+  margin: 1rem 0;
+}
+
+
+#chartContainer svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+
+/* Tooltip for WPM display on bar click */
+#wpmTooltip {
+  position: fixed;
+  background-color: #111;
+  color: #0ff;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #0ff;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 0 10px #0ff4;
+  z-index: 10000;
+  transform: translate(-50%, -100%);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Typing Trainer</title>
+  <link rel="stylesheet" href="./styles/main.css" />
+</head>
+<body>
+  <div class="app">
+    <div id="streakDisplay" class="streak-counter">Streak: 0</div>
+    <h1>Typing Trainer</h1>
+    
+    <div id="chunkDisplay"></div>
+    
+    <input
+      id="inputField"
+      type="text"
+      autocomplete="off"
+      autofocus
+      spellcheck="false"
+    />
+    <div id="stats">
+      <div id="wpm">WPM: 0</div>
+      <div id="accuracy">Accuracy: 100%</div>
+      <div id="consistency">Consistency: 100%</div>
+    </div>
+  </div>
+  <script type="module" src="./dist/main.js"></script>
+</body>
+</html>
