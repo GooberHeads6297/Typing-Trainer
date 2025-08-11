@@ -15,6 +15,7 @@ let startTime = 0;
 let finished = false;
 let typingStarted = false;
 let wpmSamples: { time: number; wpm: number }[] = [];
+let lastSampleTime = 0;
 
 const performanceContainer = document.createElement('div');
 performanceContainer.id = 'performanceContainer';
@@ -86,6 +87,14 @@ function getRandomText(): string {
   return getRandomChunk(25, 35);
 }
 
+function countMatchingCharacters(target: string, input: string): number {
+  let count = 0;
+  for (let i = 0; i < input.length; i++) {
+    if (input[i] === target[i]) count++;
+  }
+  return count;
+}
+
 function renderText(): void {
   chunkDisplay.innerHTML = '';
   for (let i = 0; i < targetText.length; i++) {
@@ -106,9 +115,9 @@ function showConfetti(): void {
   for (let i = 0; i < 80; i++) {
     const confetti = document.createElement('div');
     confetti.className = 'confetti';
-    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.left = `${Math.random() * 100}%`;
     confetti.style.background = `hsl(${Math.random() * 360}, 100%, 60%)`;
-    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    confetti.style.animationDelay = `${Math.random() * 0.5}s`;
     confettiContainer.appendChild(confetti);
   }
   document.body.appendChild(confettiContainer);
@@ -119,15 +128,19 @@ function updateStats(): void {
   const elapsed = Date.now() - startTime;
   const correctChars = countMatchingCharacters(targetText, userInput);
   const accuracy = Math.round((correctChars / targetText.length) * 100);
-  const wordCount = targetText.split(' ').length;
   const minutes = elapsed / 60000;
-  const wpm = Math.round(wordCount / minutes);
+  const wpm = minutes > 0 ? Math.round((correctChars / 5) / minutes) : 0;
 
   wpmDisplay.textContent = `WPM: ${wpm}`;
   accuracyDisplay.textContent = `Accuracy: ${accuracy}%`;
 
-  if (!finished && typingStarted && elapsed > 2000 && wpm > 0 && wpm <= 200) {
+  if (!finished && typingStarted && elapsed - lastSampleTime >= 1000 && wpm > 0 && wpm <= 200) {
     wpmSamples.push({ time: elapsed, wpm });
+    lastSampleTime = elapsed;
+
+    if (wpmSamples.length > 30) {
+      wpmSamples.shift();
+    }
   }
 
   const averageWPM = getTrimmedAverageWPM(wpmSamples);
@@ -192,10 +205,15 @@ function showPerformance(): void {
   const averageWPM = getTrimmedAverageWPM(wpmSamples);
   avgWpmDisplay.textContent = `Average WPM: ${averageWPM}`;
 
-  const durationSeconds = (wpmSamples[wpmSamples.length - 1].time / 1000).toFixed(3);
+  const durationSeconds = wpmSamples.length
+    ? (wpmSamples[wpmSamples.length - 1].time / 1000).toFixed(3)
+    : ((Date.now() - startTime) / 1000).toFixed(3);
+
   durationDisplay.textContent = `Test Duration: ${durationSeconds} second${parseFloat(durationSeconds) !== 1 ? 's' : ''}`;
 
   while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  if (wpmSamples.length === 0) return;
 
   const maxWPM = Math.max(...wpmSamples.map(s => s.wpm));
   const svgWidth = chartContainer.clientWidth || 600;
@@ -206,6 +224,9 @@ function showPerformance(): void {
 
   const barWidth = svgWidth / wpmSamples.length;
 
+  const oldTooltip = document.getElementById('wpmTooltip');
+  if (oldTooltip) oldTooltip.remove();
+
   const tooltip = document.createElement('div');
   tooltip.id = 'wpmTooltip';
   tooltip.style.position = 'absolute';
@@ -213,100 +234,72 @@ function showPerformance(): void {
   tooltip.style.color = '#0ff';
   tooltip.style.padding = '0.3rem 0.6rem';
   tooltip.style.borderRadius = '5px';
-  tooltip.style.fontSize = '0.9rem';
-  tooltip.style.display = 'none';
+  tooltip.style.visibility = 'hidden';
   tooltip.style.pointerEvents = 'none';
-  chartContainer.appendChild(tooltip);
+  tooltip.style.fontSize = '0.9rem';
+  tooltip.style.userSelect = 'none';
+  tooltip.style.whiteSpace = 'nowrap';
 
-  let circle: SVGCircleElement | null = null;
+  chartContainer.appendChild(tooltip);
 
   wpmSamples.forEach((sample, i) => {
     const barHeight = (sample.wpm / maxWPM) * svgHeight;
-    const x = i * barWidth;
-    const y = svgHeight - barHeight;
 
     const rect = document.createElementNS(svgNS, 'rect');
-    rect.setAttribute('x', `${x}`);
-    rect.setAttribute('y', `${y}`);
+    rect.setAttribute('x', (i * barWidth).toString());
+    rect.setAttribute('y', (svgHeight - barHeight).toString());
     rect.setAttribute('width', `${barWidth - 2}`);
-    rect.setAttribute('height', `${barHeight}`);
+    rect.setAttribute('height', barHeight.toString());
     rect.setAttribute('fill', '#0ff');
+    rect.style.transition = 'fill 0.3s ease';
+
+    rect.addEventListener('mouseenter', (event) => {
+      tooltip.textContent = `WPM: ${sample.wpm} at ${(sample.time / 1000).toFixed(1)}s`;
+      tooltip.style.left = `${(event.clientX - chartContainer.getBoundingClientRect().left + 10)}px`;
+      tooltip.style.top = `${(event.clientY - chartContainer.getBoundingClientRect().top - 40)}px`;
+      tooltip.style.visibility = 'visible';
+    });
+
+    rect.addEventListener('mouseleave', () => {
+      tooltip.style.visibility = 'hidden';
+    });
+
     svg.appendChild(rect);
-  });
-
-  svg.addEventListener('click', (e) => {
-    const rect = svg.getBoundingClientRect();
-    const xClick = e.clientX - rect.left;
-    const index = Math.floor((xClick / svgWidth) * wpmSamples.length);
-    const barX = index * barWidth;
-    const barHeight = (wpmSamples[index].wpm / maxWPM) * svgHeight;
-    const barY = svgHeight - barHeight;
-
-    if (circle) svg.removeChild(circle);
-    circle = document.createElementNS(svgNS, 'circle');
-    circle.setAttribute('cx', `${barX + barWidth / 2}`);
-    circle.setAttribute('cy', `${barY}`);
-    circle.setAttribute('r', '6');
-    circle.setAttribute('fill', '#f00');
-    svg.appendChild(circle);
-
-    const selectedTime = (wpmSamples[index].time / 1000).toFixed(3);
-    tooltip.style.left = `${barX + barWidth / 2}px`;
-    tooltip.style.top = `${barY - 30}px`;
-    tooltip.textContent = `WPM: ${wpmSamples[index].wpm}, Time: ${selectedTime}s`;
-    tooltip.style.display = 'block';
   });
 }
 
 function resetTest(): void {
   targetText = getRandomText();
   userInput = '';
+  inputField.value = '';
   finished = false;
   typingStarted = false;
   wpmSamples = [];
-  startTime = 0;
-  inputField.value = '';
-  inputField.classList.remove('finished');
+  lastSampleTime = 0;
+  streakDisplay.textContent = `Streak: ${streakCounter}`;
   inputField.disabled = false;
-  inputField.focus();
-
+  inputField.classList.remove('finished');
   renderText();
   wpmDisplay.textContent = 'WPM: 0';
-  accuracyDisplay.textContent = 'Accuracy: 100%';
-  consistencyDisplay.textContent = 'Consistency: 100%';
-  streakDisplay.textContent = `Streak: ${streakCounter}`;
+  accuracyDisplay.textContent = 'Accuracy: 0%';
+  consistencyDisplay.textContent = 'Consistency: 0%';
+  inputField.focus();
 }
 
 function getTrimmedAverageWPM(samples: { time: number; wpm: number }[]): number {
-  const filtered = samples
-    .filter(s => s.time >= 2000 && s.wpm >= 10 && s.wpm <= 200)
-    .map(s => s.wpm);
-
-  if (filtered.length === 0) return 0;
-
-  const sorted = filtered.sort((a, b) => a - b);
-  const trimCount = Math.floor(sorted.length * 0.1);
-  const trimmed = sorted.slice(trimCount, sorted.length - trimCount);
-  const average = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
-
-  return Math.round(average);
+  if (samples.length === 0) return 0;
+  const sorted = [...samples].sort((a, b) => a.wpm - b.wpm);
+  const trimCount = Math.floor(samples.length * 0.2);
+  const trimmed = sorted.slice(trimCount, samples.length - trimCount);
+  const sum = trimmed.reduce((acc, cur) => acc + cur.wpm, 0);
+  return Math.round(sum / trimmed.length);
 }
 
-function standardDeviation(values: number[]): number {
-  if (values.length === 0) return 0;
-  const avg = values.reduce((a, b) => a + b, 0) / values.length;
-  const squareDiffs = values.map(value => Math.pow(value - avg, 2));
-  const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / values.length;
-  return Math.sqrt(avgSquareDiff);
-}
-
-function countMatchingCharacters(expected: string, typed: string): number {
-  let correct = 0;
-  const len = Math.min(expected.length, typed.length);
-  for (let i = 0; i < len; i++) {
-    if (expected[i] === typed[i]) correct++;
-  }
-  return correct;
+function standardDeviation(arr: number[]): number {
+  if (arr.length === 0) return 0;
+  const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+  const variance = arr.reduce((a, b) => a + (b - mean) ** 2, 0) / arr.length;
+  return Math.sqrt(variance);
 }
 
 resetTest();
