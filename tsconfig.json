@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "ES6",
-    "outDir": "./dist",
+    "target": "ES2020",
+    "module": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
