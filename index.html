@@ -2,17 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Typing Trainer</title>
-  <script type="module" crossorigin src="/Typing-Trainer/assets/index-BijTwzWH.js"></script>
-  <link rel="stylesheet" crossorigin href="/Typing-Trainer/assets/index-C0NC4VtS.css">
+  <title>Typing Trainer</title>
+  <script type="module" crossorigin src="/Typing-Trainer/assets/index-BmBTXhA2.js"></script>
+  <link rel="stylesheet" crossorigin href="/Typing-Trainer/assets/index-B7BZfLZE.css">
 </head>
 <body>
   <div class="app">
-    <div id="streakDisplay" class="streak-counter">Streak: 0</div>
-    <h1>Typing Trainer</h1>
-    
+    <div class="app-header">
+      <div id="streakDisplay" class="streak-counter">Streak: 0</div>
+      <h1>Typing Trainer</h1>
+      <div class="header-right">
+        <span id="timer" class="timer-display">0s</span>
+        <button id="settingsBtn" class="icon-btn" title="Settings" aria-label="Settings">&#9881;</button>
+      </div>
+    </div>
+
     <div id="chunkDisplay"></div>
-    
+
     <input
       id="inputField"
       type="text"
@@ -25,6 +31,6 @@
       <div id="accuracy">Accuracy: 100%</div>
       <div id="consistency">Consistency: 100%</div>
     </div>
-  </div>
+  </div>
 </body>
 </html>
